@@ -1,10 +1,5 @@
 # Arduino Makefile
 
-A suite of Arduino sketches and libraries to transmit and receive data via [Amplitude Shift Keying](https://en.wikipedia.org/wiki/Amplitude-shift_keying) and Manchester encoding.
-
-The code contained in this repository is specifically tailored to a set of 315MHz RF hardware.
-
-
 This repository contains a simple Makefile that can be used with many Arudino sketches, so that the sketch may be compiled and uploaded via the command line.
 If you dislike the Arduino IDE, this Makefile will help quickly build and upload the sketches.
 
@@ -13,8 +8,8 @@ The Makefile has been tested for use with the latest versions of Arduino and avr
 Depending on your purposes, this makefile might also be able to upload a sketch to a raw ATMEL chip via a programmer.
 
 ### Latest versions tested:
-Arduino 1.6.1
-avrdude 6.1
+- Arduino 1.6.1
+- avrdude 6.1
 
 ## Quick Start
 
