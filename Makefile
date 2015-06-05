@@ -71,7 +71,7 @@ PROJECT =	Blink
 VERSION =	1.0
 
 # Arduino model. E.g. atmega328, mega, mega2560, uno.
-# Valid model names can be found in $(ARDUINO_DIR)/hardware/arduino/boards.txt
+# Valid model names can be found in $(ARDUINO_DIR)/hardware/arduino/avr/boards.txt
 # This must be set to a valid model name.
 ARDUINO_MODEL = micro
 #ARDUINO_MODEL = uno
