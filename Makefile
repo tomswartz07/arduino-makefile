@@ -70,13 +70,18 @@ PROJECT =	Blink
 # Project version. Only used for packing the source into an archive.
 VERSION =	1.0
 
-# Arduino model. E.g. atmega328, mega, mega2560, uno.
+# Arduino model. E.g. atmega328, mega2560, uno.
 # Valid model names can be found in $(ARDUINO_DIR)/hardware/arduino/avr/boards.txt
 # This must be set to a valid model name.
 ARDUINO_MODEL = micro
 #ARDUINO_MODEL = uno
 #ARDUINO_MODEL = nano328  # Is set to a 168 CPU
-#ARDUINO_MODEL = mega
+#ARDUINO_MODEL = atmega2560
+
+# Arduino family E.g. mega, diecimila, nano.
+# Valid family names can be found in $(ARDUINO_Dir)/hardware/arduino/avr/boards.txt
+# Set this if your card is a part of a subset
+#ARDUINO_FAMILY = mega
 
 # Arduino variant (for Arduino 1.0+).
 # Directory containing the pins_arduino.h file.
@@ -189,24 +194,31 @@ ARDUINO_CORE ?= $(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino
 
 # Get the upload rate, CPU model, CPU frequency, avrdude programmer type
 # and other variables from the IDE files.
+
+ifdef ARDUINO_FAMILY
+MODEL_PATTERN_MATCHING = $(ARDUINO_MODEL)\|$(ARDUINO_FAMILY)
+else
+MODEL_PATTERN_MATCHING = $(ARDUINO_MODEL)
+endif
+
 UPLOAD_RATE ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.upload.speed/ { s/.*=//; q }; d" \
+	sed "/\($(MODEL_PATTERN_MATCHING)\)\.upload.speed/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
 MCU ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.build.mcu/ { s/.*=//; q }; d" \
+	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.mcu/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
 F_CPU ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.build.f_cpu/ { s/.*=//; q }; d" \
+	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.f_cpu/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
 AVRDUDE_PROGRAMMER ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.upload.protocol/ { s/.*=//; q }; d" \
+	sed "/\($(MODEL_PATTERN_MATCHING)\)\.upload.protocol/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
 VID ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.build.vid/ { s/.*=//; q }; d" \
+	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.vid/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
 PID ?= $(shell \
@@ -657,6 +669,7 @@ showvars2:
 	: PROJECT = "$(PROJECT)", VERSION = "$(VERSION)"
 	: ARDUINO = "$(ARDUINO)"
 	: ARDUINO_MODEL = "$(ARDUINO_MODEL)"
+	: ARDUINO_FAMILY = "$(ARDUINO_FAMILY)"
 	: F_CPU = "$(F_CPU)"
 	: PORT = "$(PORT)"
 	: UPLOAD_RATE = "$(UPLOAD_RATE)"
@@ -694,6 +707,7 @@ showvars2:
 	: VPATH = "$(VPATH)"
 	: VID = "$(VID)"
 	: PID = "$(PID)"
+	: MODEL_PATTERN_MATCHING = "$(MODEL_PATTERN_MATCHING)"
 
 mkout $(OUTPUT):
 	mkdir -p $(OUTPUT)
