@@ -103,7 +103,9 @@ ARDUINO_DIR =	/usr/share/arduino
 
 # Arduino 0.x based on 328P now need the new programmer protocol.
 # Arudino 1.6+ uses the avr109 programmer by default
+ifeq ($(AVRDUDE_PROGRAMMER),)
 AVRDUDE_PROGRAMMER = avr109
+endif
 
 # Arduino core sources.
 ARDUINO_CORE =	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino
