@@ -265,9 +265,17 @@ CORESRC =	$(wildcard $(ARDUINO_CORE)/*.c)
 CORECXXSRC =	$(wildcard $(ARDUINO_CORE)/*.cpp)
 
 # Arduino official library sources.
+# 1.0.x: search in root and utility folders
+# 1.5.x: search in src folder as well.
+# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5:-Library-specification
+# 1.5.x: search in hardware folder + utility (for Wire/twi)
+# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
 ALIBDIRS = $(wildcard \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%) \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%/utility) \
+		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%/src) \
+		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/hardware/arduino/avr/libraries/%) \
+		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/hardware/arduino/avr/libraries/%/utility) \
 		)
 ALIBSRC =	$(wildcard $(ALIBDIRS:%=%/*.c))
 ALIBCXXSRC =	$(wildcard $(ALIBDIRS:%=%/*.cpp))
