@@ -87,6 +87,10 @@ ARDUINO_MODEL ?= micro
 # Directory containing the pins_arduino.h file.
 #ARDUINO_VARIANT=$(ARDUINO_DIR)/hardware/arduino/avr/variants/micro
 
+# MCU architecture.
+# Currently hardcoded to avr (sam, etc. are unsupported.)
+ARCH ?= avr
+
 # USB port the Arduino board is connected to.
 # Linux: e.g. /dev/ttyUSB0, or /dev/ttyACM0 for the Uno.
 # BSD:   e.g. /dev/cuaU0
@@ -213,6 +217,7 @@ F_CPU ?=	$(call getboardvar,build.f_cpu)
 AVRDUDE_PROGRAMMER ?= $(call getboardvar,upload.protocol)
 VID ?=		$(call getboardvar,build.vid)
 PID ?=		$(call getboardvar,build.pid)
+BOARD ?=	$(call getboardvar,build.board)
 
 # Try and guess PORT if it wasn't set previously.
 # Note using shell globs most likely won't work, so try first port.
@@ -254,6 +259,7 @@ CORECXXSRC =	$(wildcard $(ARDUINO_CORE)/*.cpp)
 # Arduino official library sources.
 # 1.0.x: search in root and utility folders
 # 1.5.x: search in src folder as well.
+# 1.5.x: search also in src/$(ARCH) (for Servo)
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5:-Library-specification
 # 1.5.x: search in hardware folder + utility (for Wire/twi)
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
@@ -261,6 +267,7 @@ ALIBDIRS = $(wildcard \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%) \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%/utility) \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%/src) \
+		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/libraries/%/src/$(ARCH)) \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/hardware/arduino/avr/libraries/%) \
 		$(ARDUINO_LIBS:%=$(ARDUINO_DIR)/hardware/arduino/avr/libraries/%/utility) \
 		)
@@ -378,6 +385,8 @@ ALLDEPS =	$(ALLOBJ:%.o=%.d)
 ### More macro definitions.
 # -DF_CPU and -DARDUINO are mandatory.
 CDEFS += 	-DF_CPU=$(F_CPU) -DARDUINO=$(ARDUINO)
+CDEFS +=	-DARDUINO_$(BOARD)
+CDEFS +=	-DARDUINO_ARCH_$(shell echo $(ARCH) | tr '[a-z]' '[A-Z]')
 
 
 ### C/C++ Compiler flags.
