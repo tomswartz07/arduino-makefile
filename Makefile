@@ -202,30 +202,17 @@ else
 MODEL_PATTERN_MATCHING = $(ARDUINO_MODEL)
 endif
 
-UPLOAD_RATE ?= $(shell \
-	sed "/\($(MODEL_PATTERN_MATCHING)\)\.upload.speed/ { s/.*=//; q }; d" \
+getboardvar = $(shell \
+	sed "/^\($(MODEL_PATTERN_MATCHING)\)\.$(1)=/ { s/.*=//; q }; d" \
 		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
 	)
-MCU ?= $(shell \
-	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.mcu/ { s/.*=//; q }; d" \
-		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
-	)
-F_CPU ?= $(shell \
-	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.f_cpu/ { s/.*=//; q }; d" \
-		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
-	)
-AVRDUDE_PROGRAMMER ?= $(shell \
-	sed "/\($(MODEL_PATTERN_MATCHING)\)\.upload.protocol/ { s/.*=//; q }; d" \
-		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
-	)
-VID ?= $(shell \
-	sed "/\($(MODEL_PATTERN_MATCHING)\)\.build.vid/ { s/.*=//; q }; d" \
-		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
-	)
-PID ?= $(shell \
-	sed "/$(ARDUINO_MODEL)\.build.pid/ { s/.*=//; q }; d" \
-		$(ARDUINO_DIR)/hardware/arduino/avr/boards.txt \
-	)
+
+UPLOAD_RATE ?=	$(call getboardvar,upload.speed)
+MCU ?=		$(call getboardvar,build.mcu)
+F_CPU ?=	$(call getboardvar,build.f_cpu)
+AVRDUDE_PROGRAMMER ?= $(call getboardvar,upload.protocol)
+VID ?=		$(call getboardvar,build.vid)
+PID ?=		$(call getboardvar,build.pid)
 
 # Try and guess PORT if it wasn't set previously.
 # Note using shell globs most likely won't work, so try first port.
