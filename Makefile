@@ -65,15 +65,15 @@ OSNAME =	$(shell uname)
 
 # Name of the program and source .ino (previously .pde) file.
 # No extension here (e.g. PROJECT = Blink).
-PROJECT =	Blink
+PROJECT ?=	Blink
 
 # Project version. Only used for packing the source into an archive.
-VERSION =	1.0
+VERSION ?=	1.0
 
 # Arduino model. E.g. atmega328, mega2560, uno.
 # Valid model names can be found in $(ARDUINO_DIR)/hardware/arduino/avr/boards.txt
 # This must be set to a valid model name.
-ARDUINO_MODEL = micro
+ARDUINO_MODEL ?= micro
 #ARDUINO_MODEL = uno
 #ARDUINO_MODEL = nano328  # Is set to a 168 CPU
 #ARDUINO_MODEL = atmega2560
@@ -93,30 +93,30 @@ ARDUINO_MODEL = micro
 # It is a good idea to use udev rules to create a device name that is constant,
 # based on the serial number etc. of the USB device.
 #PORT =		/dev/ttyACM1
-PORT =		/dev/serial/by-id/*Arduino*
+PORT ?=		/dev/serial/by-id/*Arduino*
 
 # Arduino version (e.g. 23 for 0023, or 105 for 1.0.5).
 # Make sure this matches ARDUINO_DIR below!
 #ARDUINO = 	23
-ARDUINO = 	161
+ARDUINO ?= 	161
 
 # Location of the official Arduino IDE.
 # E.g. /usr/local/arduino, or $(HOME)/arduino
 # Make sure this matches ARDUINO above!
 #ARDUINO_DIR =	/usr/local/pckg/arduino/arduino-0023
-ARDUINO_DIR =	/usr/share/arduino
+ARDUINO_DIR ?=	/usr/share/arduino
 
 # Arduino 0.x based on 328P now need the new programmer protocol.
-# Arudino 1.6+ uses the avr109 programmer by default
-ifeq ($(AVRDUDE_PROGRAMMER),)
-AVRDUDE_PROGRAMMER = avr109
-endif
+# Arduino 1.6+ uses the avr109 programmer by default
+# If unset, a default is chosen based on ARDUINO_MODEL and ARDUINO_FAMILY.
+#AVRDUDE_PROGRAMMER = avr109
 
 # Arduino core sources.
-ARDUINO_CORE =	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino
+#ARDUINO_CORE ?=	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino
 
 # Standard Arduino libraries used, e.g. EEPROM, LiquidCrystal.
 # Give the name of the directory containing the library source files.
+ifndef ARDUINO_LIBS
 ARDUINO_LIBS =
 ARDUINO_LIBS += EEPROM
 ARDUINO_LIBS += Wire
@@ -124,11 +124,12 @@ ARDUINO_LIBS += SPI
 ifdef SD  # Comment out this condition to always use the SD library.
 ARDUINO_LIBS += SD
 endif
+endif
 
 # User libraries (in ~/sketchbook/libraries/).
 # Give the name of the directory containing the library source files.
-USER_LIBDIR =	./libraries
-USER_LIBS =
+USER_LIBDIR ?=	./libraries
+USER_LIBS ?=
 
 # Additional pre-compiled libraries to link with.
 # Always leave the math (m) library last!
@@ -136,7 +137,7 @@ USER_LIBS =
 # If the library is in a location the compiler doesn't already know, also
 # give the directory with -L.
 # Note this is dealing with real libraries (libXXX.a), not Arduino "libraries"!
-LDLIBS =
+LDLIBS ?=
 LDLIBS +=	-lm
 
 LISTING_ARGS =	-h -S
@@ -147,20 +148,20 @@ SYMBOL_ARGS +=	-C
 
 # Directory in which files are created.
 # Using the current directory ('.') is untested (and probably unwise).
-OUTPUT =	bin
+OUTPUT ?=	bin
 
 # Where are tools like avr-gcc located on your system?
 # If you set this, it must end with a slash!
 #AVR_TOOLS_PATH = $(ARDUINO_DIR)/hardware/tools/avr/bin/
 #AVR_TOOLS_PATH = /usr/bin/
-AVR_TOOLS_PATH =
+AVR_TOOLS_PATH ?=
 
 # Reset command to use.
 # Possible values are: "stty", "python", "perl".
-RESETCMD =	stty
+#RESETCMD =	stty
 
 ### Macro definitions. Place -D or -U options here.
-CDEFS =
+CDEFS ?=
 ifdef LTO
 CDEFS +=	-DLTO
 endif
@@ -428,6 +429,7 @@ OPT_DEBUG =	-g2 -gstabs
 # Turning on all warnings shows a large number of less-than-optimal program
 # locations in the Arduino sources. Some might turn into errors. Either fix
 # your Arduino sources, or turn the warnings off.
+ifndef OPT_WARN
 OPT_WARN =	-Wall
 OPT_WARN +=	-pedantic
 OPT_WARN +=	-Wextra
@@ -435,11 +437,17 @@ OPT_WARN +=	-Wmissing-declarations
 OPT_WARN +=	-Wmissing-field-initializers
 OPT_WARN +=	-Wsystem-headers
 OPT_WARN +=	-Wno-variadic-macros
+endif
+ifndef OPT_WARN_C
 OPT_WARN_C =	$(OPT_WARN)
 OPT_WARN_C +=	-Wmissing-prototypes
+endif
+ifndef OPT_WARN_CXX
 OPT_WARN_CXX =	$(OPT_WARN)
+endif
 
 # Other.
+ifndef OPT_OTHER
 OPT_OTHER =
 # Save gcc temp files (pre-processor, assembler):
 #OPT_OTHER +=	-save-temps
@@ -447,6 +455,7 @@ OPT_OTHER =
 # Automatically enable build.extra_flags if needed
 # Used by Micro and other devices to fill in USB_PID and USB_VID
 OPT_OTHER +=	-DUSB_VID=$(VID) -DUSB_PID=$(PID)
+endif
 
 # Final combined.
 CFLAGS =	-mmcu=$(MCU) \
