@@ -245,7 +245,7 @@ endif
 # This makefile part is incomplete. Best set variant explicitly at the top.
 # Default is "standard".
 ifeq ($(ARDUINO_VARIANT),)
-ifeq "$(ARDUINO_MODEL)" "mega"
+ifeq ("$(ARDUINO_MODEL)", $(filter "$(ARDUINO_MODEL)", "mega" "mega2560"))
 ARDUINO_VARIANT ?= $(ARDUINO_DIR)/hardware/arduino/avr/variants/mega
 else
 ifeq "$(ARDUINO_MODEL)" "micro"
