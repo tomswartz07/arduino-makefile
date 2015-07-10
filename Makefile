@@ -229,7 +229,7 @@ PID ?= $(shell \
 # Try and guess PORT if it wasn't set previously.
 # Note using shell globs most likely won't work, so try first port.
 ifeq "$(OSNAME)" "Linux"
-ifeq "$(ARDUINO_MODEL)" "uno"
+ifeq ("$(ARDUINO_MODEL)", $(filter "$(ARDUINO_MODEL)", "uno" "mega2560"))
     PORT ?= /dev/ttyACM0
 else
     PORT ?= /dev/ttyUSB0
