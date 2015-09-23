@@ -94,9 +94,9 @@ ARCH ?= avr
 # USB port the Arduino board is connected to.
 # Linux: e.g. /dev/ttyUSB0, or /dev/ttyACM0 for the Uno.
 # BSD:   e.g. /dev/cuaU0
+# USBASP: e.g. /dev/ttyS0
 # It is a good idea to use udev rules to create a device name that is constant,
 # based on the serial number etc. of the USB device.
-#PORT =		/dev/ttyACM1
 PORT ?=		/dev/serial/by-id/*Arduino*
 
 # Arduino version (e.g. 23 for 0023, or 105 for 1.0.5).
@@ -112,8 +112,10 @@ ARDUINO_DIR ?=	/usr/share/arduino
 
 # Arduino 0.x based on 328P now need the new programmer protocol.
 # Arduino 1.6+ uses the avr109 programmer by default
+# ICSP programmers can also be used, for example: usbasp
 # If unset, a default is chosen based on ARDUINO_MODEL and ARDUINO_FAMILY.
-#AVRDUDE_PROGRAMMER = avr109
+#AVRDUDE_PROGRAMMER = usbasp
+AVRDUDE_PROGRAMMER = avr109
 
 # Arduino core sources.
 #ARDUINO_CORE ?=	$(ARDUINO_DIR)/hardware/arduino/avr/cores/arduino

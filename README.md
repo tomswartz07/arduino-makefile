@@ -8,7 +8,7 @@ The Makefile has been tested for use with the latest versions of Arduino and avr
 Depending on your purposes, this makefile might also be able to upload a sketch to a raw ATMEL chip via a programmer.
 
 ### Latest versions tested:
-- Arduino 1.6.1
+- Arduino 1.6.5
 - avrdude 6.1
 
 ## Quick Start
