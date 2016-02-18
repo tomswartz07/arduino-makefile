@@ -257,6 +257,7 @@ endif
 # Arduino core sources.
 CORESRC =	$(wildcard $(ARDUINO_CORE)/*.c)
 CORECXXSRC =	$(wildcard $(ARDUINO_CORE)/*.cpp)
+COREASMSRC =	$(wildcard $(ARDUINO_CORE)/*.S)
 
 # Arduino official library sources.
 # 1.0.x: search in root and utility folders
@@ -275,6 +276,7 @@ ALIBDIRS = $(wildcard \
 		)
 ALIBSRC =	$(wildcard $(ALIBDIRS:%=%/*.c))
 ALIBCXXSRC =	$(wildcard $(ALIBDIRS:%=%/*.cpp))
+ALIBASMSRC =	$(wildcard $(ALIBDIRS:%=%/*.S))
 
 # All Arduino library sources.
 ARDUINO_ALL_LIBS = $(notdir $(wildcard $(ARDUINO_DIR)/libraries/*))
@@ -284,6 +286,7 @@ ALIBALLDIRS = $(wildcard \
 		)
 ALIBALLSRC =	$(wildcard $(ALIBALLDIRS:%=%/*.c))
 ALIBALLCXXSRC =	$(wildcard $(ALIBALLDIRS:%=%/*.cpp))
+ALIBALLASMSRC =	$(wildcard $(ALIBALLDIRS:%=%/*.S))
 
 # User library sources.
 ULIBDIRS = $(wildcard \
@@ -292,6 +295,7 @@ ULIBDIRS = $(wildcard \
 		)
 ULIBSRC =	$(wildcard $(ULIBDIRS:%=%/*.c))
 ULIBCXXSRC =	$(wildcard $(ULIBDIRS:%=%/*.cpp))
+ULIBASMSRC =	$(wildcard $(ULIBDIRS:%=%/*.S))
 
 # User program sources.
 SRC =		$(wildcard *.c)
@@ -347,33 +351,37 @@ CINCS = \
 
 # Arduino core.
 COREOBJ =	$(addprefix $(OUTPUT)/,$(notdir \
-			$(CORESRC:.c=.o) \
-			$(CORECXXSRC:.cpp=.o) \
+			$(CORESRC:.c=.c.o) \
+			$(CORECXXSRC:.cpp=.cpp.o) \
+			$(COREASMSRC:.S=.S.o) \
 		))
 
 # Arduino libraries used.
 ALIBOBJ =	$(addprefix $(OUTPUT)/,$(notdir \
-			$(ALIBSRC:.c=.o) \
-			$(ALIBCXXSRC:.cpp=.o) \
+			$(ALIBSRC:.c=.c.o) \
+			$(ALIBCXXSRC:.cpp=.cpp.o) \
+			$(ALIBASMSRC:.S=.S.o) \
 		))
 
 # All Arduino libraries.
 ALIBALLOBJ =	$(addprefix $(OUTPUT)/,$(notdir \
-			$(ALIBALLSRC:.c=.o) \
-			$(ALIBALLCXXSRC:.cpp=.o) \
+			$(ALIBALLSRC:.c=.c.o) \
+			$(ALIBALLCXXSRC:.cpp=.cpp.o) \
+			$(ALIBALLASMSRC:.S=.S.o) \
 		))
 
 # User libraries used.
 ULIBOBJ =	$(addprefix $(OUTPUT)/,$(notdir \
-			$(ULIBSRC:.c=.o) \
-			$(ULIBCXXSRC:.cpp=.o) \
+			$(ULIBSRC:.c=.c.o) \
+			$(ULIBCXXSRC:.cpp=.cpp.o) \
+			$(ULIBASMSRC:.S=.S.o) \
 		))
 
 # User program.
 OBJ =		$(addprefix $(OUTPUT)/,$(notdir \
-			$(SRC:.c=.o) \
-			$(CXXSRC:.cpp=.o) \
-			$(ASRC:.S=.o) \
+			$(SRC:.c=.c.o) \
+			$(CXXSRC:.cpp=.cpp.o) \
+			$(ASRC:.S=.S.o) \
 		))
 
 # All object files.
@@ -461,6 +469,7 @@ OPT_OTHER =
 # Automatically enable build.extra_flags if needed
 # Used by Micro and other devices to fill in USB_PID and USB_VID
 OPT_OTHER +=	-DUSB_VID=$(VID) -DUSB_PID=$(PID)
+OPT_OTHER += -fno-use-cxa-atexit
 endif
 
 # Final combined.
@@ -516,7 +525,7 @@ AVRDUDE_FLAGS+= -P $(PORT)
 
 # avrdude config file
 AVRDUDE_FLAGS+= -C /etc/avrdude.conf
-#AVRDUDE_FLAGS+= -C $(ARDUINO_DIR)/hardware/tools/avrdude.conf
+#AVRDUDE_FLAGS+= -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(OUTPUT)/$(PROJECT).hex:i
 
@@ -550,24 +559,24 @@ endif
 .SUFFIXES: .cpp .c .S .o .a
 
 # Compile: create object files from C++ source files.
-%.o $(OUTPUT)/%.o: %.cpp
+%.cpp.o $(OUTPUT)/%.cpp.o: %.cpp
 	$(CXX) -o $@ -c $(CXXFLAGS) $< \
-	  -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@ $(@:%.o=%.S) $(@:%.o=%.d)" \
+	  -MMD -MP -MF"$(@:%.cpp.o=%.d)" -MT"$@ $(@:%.cpp.o=%.S) $(@:%.cpp.o=%.d)" \
 	  $(CINCS)
-	if [ -f "$(notdir $(@:.o=.s))" -a ! -f "$(@:.o=.s)" ]; then \
-	  mv "$(notdir $(@:.o=.s))" "$(dir $@)"; fi
-	if [ -f "$(notdir $(@:.o=.ii))" -a ! -f "$(@:.o=.ii)" ]; then \
-	  mv "$(notdir $(@:.o=.ii))" "$(dir $@)"; fi
+	if [ -f "$(notdir $(@:.cpp.o=.s))" -a ! -f "$(@:.cpp.o=.s)" ]; then \
+	  mv "$(notdir $(@:.cpp.o=.s))" "$(dir $@)"; fi
+	if [ -f "$(notdir $(@:.cpp.o=.ii))" -a ! -f "$(@:.cpp.o=.ii)" ]; then \
+	  mv "$(notdir $(@:.cpp.o=.ii))" "$(dir $@)"; fi
 
 # Compile: create object files from C source files.
-%.o $(OUTPUT)/%.o: %.c
+%.c.o $(OUTPUT)/%.c.o: %.c
 	$(CC) -o $@ -c $(CFLAGS) $< \
-	  -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@ $(@:%.o=%.S) $(@:%.o=%.d)" \
+	  -MMD -MP -MF"$(@:%.c.o=%.d)" -MT"$@ $(@:%.c.o=%.S) $(@:%.c.o=%.d)" \
 	  $(CINCS)
-	if [ -f "$(notdir $(@:.o=.s))" -a ! -f "$(@:.o=.s)" ]; then \
-	  mv "$(notdir $(@:.o=.s))" "$(dir $@)"; fi
-	if [ -f "$(notdir $(@:.o=.i))" -a ! -f "$(@:.o=.i)" ]; then \
-	  mv "$(notdir $(@:.o=.i))" "$(dir $@)"; fi
+	if [ -f "$(notdir $(@:.c.o=.s))" -a ! -f "$(@:.c.o=.s)" ]; then \
+	  mv "$(notdir $(@:.c.o=.s))" "$(dir $@)"; fi
+	if [ -f "$(notdir $(@:.c.o=.i))" -a ! -f "$(@:.c.o=.i)" ]; then \
+	  mv "$(notdir $(@:.c.o=.i))" "$(dir $@)"; fi
 
 # Compile: create assembler files from C++ source files.
 %.S $(OUTPUT)/%.S: %.cpp
@@ -582,9 +591,9 @@ endif
 	  $(CINCS)
 
 # Assemble: create object files from assembler source files.
-%.o $(OUTPUT)/%.o: %.S
+%.S.o $(OUTPUT)/%.S.o: %.S
 	$(CC) -o $@ -c $(ASFLAGS) $< \
-	  -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@ $(@:%.o=%.S) $(@:%.o=%.d)" \
+	  -MMD -MP -MF"$(@:%.S.o=%.d)" -MT"$@ $(@:%.S.o=%.S) $(@:%.S.o=%.d)" \
 	  $(CINCS)
 
 # Create extended listing file from object file.
